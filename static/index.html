@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point and Figure Chart - MT5</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .status-bar {
+            padding: 15px 20px;
+            background: #fff3cd;
+            border-bottom: 2px solid #ffc107;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .status-bar.connected {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .status-bar.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .status-text {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .chart-info {
+            padding: 15px 20px;
+            background: #e7f3ff;
+            border-bottom: 2px solid #2196F3;
+            display: none;
+        }
+
+        .chart-info.active {
+            display: block;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .info-item {
+            font-size: 13px;
+        }
+
+        .info-item strong {
+            color: #2196F3;
+        }
+
+        .chart-container {
+            padding: 20px;
+            overflow-x: auto;
+            background: white;
+        }
+
+        #pnfChart {
+            min-height: 500px;
+            position: relative;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #6c757d;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            cursor: crosshair;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .legend-x {
+            color: #28a745;
+        }
+
+        .legend-o {
+            color: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Point and Figure Chart</h1>
+            <p>Connected to MetaTrader 5</p>
+        </div>
+
+        <div class="status-bar" id="statusBar">
+            <span class="status-text" id="statusText">ไม่ได้เชื่อมต่อ MT5</span>
+        </div>
+
+        <div class="controls">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>MT5 Login</label>
+                    <input type="number" id="mt5Login" placeholder="12345678">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="mt5Password" placeholder="your_password">
+                </div>
+                <div class="form-group">
+                    <label>Server</label>
+                    <input type="text" id="mt5Server" placeholder="YourBroker-Demo">
+                </div>
+                <div class="form-group">
+                    <label>MT5 Path (Optional)</label>
+                    <input type="text" id="mt5Path" placeholder="C:/Program Files/MetaTrader 5/terminal64.exe">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-success" onclick="connectMT5()">🔗 เชื่อมต่อ MT5</button>
+                <button class="btn-secondary" onclick="disconnectMT5()">❌ ตัดการเชื่อมต่อ</button>
+            </div>
+
+            <hr style="margin: 20px 0; border: none; border-top: 2px solid #e9ecef;">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Symbol</label>
+                    <input type="text" id="symbol" value="EURUSD" placeholder="EURUSD">
+                </div>
+                <div class="form-group">
+                    <label>Timeframe</label>
+                    <select id="timeframe">
+                        <option value="M1">M1</option>
+                        <option value="M5">M5</option>
+                        <option value="M15" selected>M15</option>
+                        <option value="M30">M30</option>
+                        <option value="H1">H1</option>
+                        <option value="H4">H4</option>
+                        <option value="D1">D1</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Bars</label>
+                    <input type="number" id="bars" value="1000" min="100" max="50000">
+                </div>
+                <div class="form-group">
+                    <label>Box Size</label>
+                    <input type="number" id="boxSize" value="10" min="1" step="1">
+                </div>
+                <div class="form-group">
+                    <label>Reversal Amount</label>
+                    <input type="number" id="reversalAmount" value="3" min="1" max="10">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="loadChart()">📈 โหลดกราฟ</button>
+            </div>
+        </div>
+
+        <div class="chart-info" id="chartInfo">
+            <div class="info-grid">
+                <div class="info-item"><strong>Symbol:</strong> <span id="infoSymbol">-</span></div>
+                <div class="info-item"><strong>Timeframe:</strong> <span id="infoTimeframe">-</span></div>
+                <div class="info-item"><strong>Bars:</strong> <span id="infoBars">-</span></div>
+                <div class="info-item"><strong>Columns:</strong> <span id="infoColumns">-</span></div>
+                <div class="info-item"><strong>Box Size:</strong> <span id="infoBoxSize">-</span></div>
+                <div class="info-item"><strong>Current Bid:</strong> <span id="infoBid">-</span></div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div id="pnfChart">
+                <div class="loading" id="loadingText">กรุณาเชื่อมต่อ MT5 และโหลดกราฟ</div>
+            </div>
+            <div class="legend">
+                <div class="legend-item legend-x">
+                    <span style="font-size: 24px; font-weight: bold;">X</span>
+                    <span>Rising (Bullish)</span>
+                </div>
+                <div class="legend-item legend-o">
+                    <span style="font-size: 24px; font-weight: bold;">O</span>
+                    <span>Falling (Bearish)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let appConfig = null;
+
+        // Load configuration from server
+        async function loadConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/api/config`);
+                
+                if (!response.ok) {
+                    console.log('Config not available');
+                    return null;
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.log('Config response is not JSON');
+                    return null;
+                }
+
+                const config = await response.json();
+                appConfig = config;
+                
+                // Fill MT5 form fields
+                if (config.mt5) {
+                    if (config.mt5.login) {
+                        document.getElementById('mt5Login').value = config.mt5.login;
+                    }
+                    if (config.mt5.server) {
+                        document.getElementById('mt5Server').value = config.mt5.server;
+                    }
+                    if (config.mt5.path) {
+                        document.getElementById('mt5Path').value = config.mt5.path;
+                    }
+                }
+
+                // Fill chart form fields
+                if (config.chart) {
+                    if (config.chart.symbol) {
+                        document.getElementById('symbol').value = config.chart.symbol;
+                    }
+                    if (config.chart.timeframe) {
+                        document.getElementById('timeframe').value = config.chart.timeframe;
+                    }
+                    if (config.chart.bars) {
+                        document.getElementById('bars').value = config.chart.bars;
+                    }
+                }
+
+                // Fill P&F settings
+                if (config.pnf) {
+                    if (config.pnf.box_size) {
+                        document.getElementById('boxSize').value = config.pnf.box_size;
+                    }
+                    if (config.pnf.reversal_amount) {
+                        document.getElementById('reversalAmount').value = config.pnf.reversal_amount;
+                    }
+                }
+
+                return config;
+            } catch (error) {
+                console.log('Error loading config:', error);
+                return null;
+            }
+        }
+
+        // Auto-connect to MT5 if configured
+        async function autoConnect() {
+            const config = appConfig || await loadConfig();
+            
+            if (!config || !config.mt5 || !config.mt5.auto_connect) {
+                console.log('Auto-connect disabled or config not available');
+                return;
+            }
+
+            const login = config.mt5.login;
+            const server = config.mt5.server;
+            const path = config.mt5.path;
+
+            if (!login || !server) {
+                console.log('MT5 credentials not configured');
+                updateStatus('กรุณาตั้งค่า MT5 Login และ Server ใน config.json', 'error');
+                return;
+            }
+
+            console.log('Auto-connecting to MT5...');
+            updateStatus('กำลังเชื่อมต่อ MT5 อัตโนมัติ...', 'loading');
+
+            try {
+                // Read password from config file (backend will handle this)
+                const response = await fetch(`${API_BASE}/api/connect`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        login: login,
+                        password: "from_config", // Signal to use password from config
+                        server: server,
+                        path: path || null
+                    })
+                });
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned invalid response');
+                }
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    updateStatus(`เชื่อมต่อสำเร็จ - ${data.account.name} (${data.account.login})`, 'connected');
+                    
+                    // Auto-load chart if configured
+                    if (config.chart && config.chart.auto_load) {
+                        setTimeout(() => {
+                            console.log('Auto-loading chart...');
+                            loadChart();
+                        }, 1000);
+                    }
+                } else {
+                    updateStatus(`เชื่อมต่อล้มเหลว: ${data.error || data.detail}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`เกิดข้อผิดพลาด: ${error.message}`, 'error');
+                console.error('Auto-connect error:', error);
+            }
+        }
+
+        async function connectMT5() {
+            const login = parseInt(document.getElementById('mt5Login').value);
+            const password = document.getElementById('mt5Password').value;
+            const server = document.getElementById('mt5Server').value;
+            const path = document.getElementById('mt5Path').value;
+
+            if (!login || !password || !server) {
+                alert('กรุณากรอก Login, Password และ Server');
+                return;
+            }
+
+            updateStatus('กำลังเชื่อมต่อ...', 'loading');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/connect`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({login, password, server, path: path || null})
+                });
+
+                // Check content type
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned invalid response. Make sure the API server is running.');
+                }
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    updateStatus(`เชื่อมต่อสำเร็จ - ${data.account.name} (${data.account.login})`, 'connected');
+                } else {
+                    updateStatus(`เชื่อมต่อล้มเหลว: ${data.error || data.detail}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`เกิดข้อผิดพลาด: ${error.message}`, 'error');
+                console.error('Connection error:', error);
+            }
+        }
+
+        async function disconnectMT5() {
+            try {
+                await fetch(`${API_BASE}/api/disconnect`);
+                updateStatus('ตัดการเชื่อมต่อแล้ว', 'loading');
+                document.getElementById('chartInfo').classList.remove('active');
+                document.getElementById('pnfChart').innerHTML = '<div class="loading">กรุณาเชื่อมต่อ MT5 และโหลดกราฟ</div>';
+            } catch (error) {
+                console.error('Error disconnecting:', error);
+            }
+        }
+
+        async function loadChart() {
+            const symbol = document.getElementById('symbol').value;
+            const timeframe = document.getElementById('timeframe').value;
+            const bars = parseInt(document.getElementById('bars').value);
+            const boxSize = parseFloat(document.getElementById('boxSize').value);
+            const reversalAmount = parseInt(document.getElementById('reversalAmount').value);
+
+            if (!symbol) {
+                alert('กรุณากรอก Symbol');
+                return;
+            }
+
+            document.getElementById('pnfChart').innerHTML = '<div class="loading">กำลังโหลดข้อมูล</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/chart`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({symbol, timeframe, bars, box_size: boxSize, reversal_amount: reversalAmount})
+                });
+
+                // Check content type
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned invalid response. Make sure you are connected to MT5.');
+                }
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to load chart');
+                }
+
+                const data = await response.json();
+                drawChart(data);
+                updateChartInfo(data);
+            } catch (error) {
+                document.getElementById('pnfChart').innerHTML = `<div class="loading" style="color: #dc3545;">เกิดข้อผิดพลาด: ${error.message}</div>`;
+                console.error('Chart loading error:', error);
+            }
+        }
+
+        function drawChart(data) {
+            const container = document.getElementById('pnfChart');
+            container.innerHTML = '';
+
+            if (!data.columns || data.columns.length === 0) {
+                container.innerHTML = '<div class="loading">ไม่มีข้อมูลให้แสดง</div>';
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            container.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            
+            // Chart dimensions - เพิ่มขนาด padding สำหรับตัวเลขที่ใหญ่ขึ้น
+            const boxPixelSize = 30;
+            const padding = 100; // เพิ่มจาก 60 เป็น 100
+            const numColumns = data.columns.length;
+            const numRows = data.max_box - data.min_box + 1;
+
+            // Set canvas size
+            canvas.width = Math.max(800, numColumns * boxPixelSize + padding * 2);
+            canvas.height = numRows * boxPixelSize + padding * 2;
+
+            // Responsive canvas
+            const containerWidth = container.clientWidth;
+            if (canvas.width > containerWidth) {
+                const scale = containerWidth / canvas.width;
+                canvas.style.width = '100%';
+                canvas.style.height = 'auto';
+            }
+
+            // Draw grid
+            ctx.strokeStyle = '#e9ecef';
+            ctx.lineWidth = 1;
+
+            // Vertical lines
+            for (let i = 0; i <= numColumns; i++) {
+                const x = padding + i * boxPixelSize;
+                ctx.beginPath();
+                ctx.moveTo(x, padding);
+                ctx.lineTo(x, canvas.height - padding);
+                ctx.stroke();
+            }
+
+            // Horizontal lines
+            for (let i = 0; i <= numRows; i++) {
+                const y = padding + i * boxPixelSize;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(canvas.width - padding, y);
+                ctx.stroke();
+            }
+
+            // Draw price labels - ปรับขนาดและสไตล์ให้ชัดเจนขึ้น
+            ctx.fillStyle = '#2c3e50'; // สีเข้มขึ้น
+            ctx.font = 'bold 16px Arial'; // เพิ่มจาก 11px เป็น 16px และเป็น bold
+            ctx.textAlign = 'right';
+
+            for (let i = 0; i <= numRows; i++) {
+                if (i % 5 === 0) { // แสดงทุก 5 แถว
+                    const boxNum = data.max_box - i;
+                    const price = (boxNum * data.box_size).toFixed(data.box_size < 1 ? 5 : 2);
+                    const y = padding + i * boxPixelSize + boxPixelSize / 2;
+                    
+                    // เพิ่มพื้นหลังสีขาวให้ตัวเลข
+                    const textWidth = ctx.measureText(price).width;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.fillRect(padding - textWidth - 25, y - 10, textWidth + 15, 20);
+                    
+                    // วาดตัวเลข
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.fillText(price, padding - 15, y + 6);
+                }
+            }
+
+            // Draw columns
+            data.columns.forEach((column, colIndex) => {
+                const x = padding + colIndex * boxPixelSize;
+
+                column.boxes.forEach(boxNum => {
+                    const rowIndex = data.max_box - boxNum;
+                    const y = padding + rowIndex * boxPixelSize;
+
+                    if (column.type === 'X') {
+                        // Draw X - เพิ่มความหนา
+                        ctx.strokeStyle = '#28a745';
+                        ctx.lineWidth = 4; // เพิ่มจาก 3 เป็น 4
+                        ctx.beginPath();
+                        ctx.moveTo(x + 5, y + 5);
+                        ctx.lineTo(x + boxPixelSize - 5, y + boxPixelSize - 5);
+                        ctx.moveTo(x + boxPixelSize - 5, y + 5);
+                        ctx.lineTo(x + 5, y + boxPixelSize - 5);
+                        ctx.stroke();
+                    } else {
+                        // Draw O - เพิ่มความหนา
+                        ctx.strokeStyle = '#dc3545';
+                        ctx.lineWidth = 4; // เพิ่มจาก 3 เป็น 4
+                        ctx.beginPath();
+                        ctx.arc(
+                            x + boxPixelSize / 2,
+                            y + boxPixelSize / 2,
+                            boxPixelSize / 2 - 5,
+                            0,
+                            Math.PI * 2
+                        );
+                        ctx.stroke();
+                    }
+                });
+            });
+        }
+
+        function updateChartInfo(data) {
+            document.getElementById('chartInfo').classList.add('active');
+            document.getElementById('infoSymbol').textContent = data.symbol;
+            document.getElementById('infoTimeframe').textContent = data.timeframe;
+            document.getElementById('infoBars').textContent = data.bars_analyzed;
+            document.getElementById('infoColumns').textContent = data.columns.length;
+            document.getElementById('infoBoxSize').textContent = data.box_size;
+            document.getElementById('infoBid').textContent = data.current_bid ? data.current_bid.toFixed(5) : '-';
+        }
+
+        function updateStatus(text, type) {
+            const statusBar = document.getElementById('statusBar');
+            const statusText = document.getElementById('statusText');
+            
+            statusBar.className = 'status-bar';
+            if (type === 'connected') {
+                statusBar.classList.add('connected');
+            } else if (type === 'error') {
+                statusBar.classList.add('error');
+            }
+            
+            statusText.textContent = text;
+        }
+
+        // Check connection status on load
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/status`);
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.log('Server not ready or not returning JSON');
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.connected) {
+                    updateStatus('เชื่อมต่อ MT5 แล้ว', 'connected');
+                }
+            } catch (error) {
+                // Silently fail on initial load - server might not be ready
+                console.log('Status check failed - this is normal on first load');
+            }
+        }
+
+        // Initialize application
+        async function initApp() {
+            console.log('Initializing application...');
+            
+            // Load configuration
+            const config = await loadConfig();
+            
+            if (!config) {
+                console.log('Config not loaded, using defaults');
+                updateStatus('ไม่ได้เชื่อมต่อ MT5 - กรุณาตั้งค่าและเชื่อมต่อ', 'loading');
+                return;
+            }
+
+            // Check if already connected
+            await checkStatus();
+
+            // Auto-connect if configured and not already connected
+            if (config.mt5 && config.mt5.auto_connect) {
+                setTimeout(() => {
+                    autoConnect();
+                }, 500);
+            }
+        }
+
+        // Initialize on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>

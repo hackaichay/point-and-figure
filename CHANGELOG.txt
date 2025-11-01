@@ -1,0 +1,143 @@
+═══════════════════════════════════════════════════════
+🔄 CHANGELOG - Point & Figure Chart MT5
+═══════════════════════════════════════════════════════
+
+Version 1.1.0 - ล่าสุด (2024-10-31)
+───────────────────────────────────────────────────────
+
+✨ คุณสมบัติใหม่: Auto-Connect & Auto-Load
+   • เชื่อมต่อ MT5 อัตโนมัติเมื่อเปิดหน้าเว็บ
+   • โหลดกราฟอัตโนมัติหลังเชื่อมต่อสำเร็จ
+   • ดึงค่าทั้งหมดจาก config.json
+   • ตั้งค่า Symbol เริ่มต้นได้
+   
+📝 การตั้งค่าใหม่ใน config.json:
+   
+   "mt5": {
+     "auto_connect": true    ← เชื่อมต่ออัตโนมัติ
+   },
+   "chart": {
+     "symbol": "EURUSD",     ← Symbol เริ่มต้น
+     "timeframe": "M15",     ← Timeframe เริ่มต้น
+     "bars": 1000,           ← จำนวน bars
+     "auto_load": true       ← โหลดกราฟอัตโนมัติ
+   }
+
+🎯 ผลลัพธ์:
+   • เปิดหน้าเว็บ → เชื่อมต่อ → แสดงกราฟ ทันที!
+   • ไม่ต้องกรอกข้อมูลซ้ำทุกครั้ง
+   • ประหยัดเวลา 90%
+   
+🔧 Backend Changes:
+   • แก้ไข /api/config endpoint ให้ส่งค่าที่จำเป็น
+   • แก้ไข /api/connect รองรับ password จาก config
+   • เพิ่ม security check สำหรับ password
+
+🎨 Frontend Changes:
+   • เพิ่มฟังก์ชัน loadConfig()
+   • เพิ่มฟังก์ชัน autoConnect()
+   • เพิ่มฟังก์ชัน initApp()
+   • Auto-fill ฟอร์มจาก config
+
+
+═══════════════════════════════════════════════════════
+
+Version 1.0.3 - (2024-10-31)
+───────────────────────────────────────────────────────
+
+✅ ปรับปรุง: ขนาดตัวเลขราคาบนกราฟ
+   • เพิ่มขนาดฟอนต์จาก 11px → 16px (ใหญ่ขึ้น 45%)
+   • เปลี่ยนเป็น bold font สำหรับความชัดเจน
+   • เพิ่มพื้นหลังสีขาวให้ตัวเลข (อ่านง่ายขึ้น)
+   • เปลี่ยนสีตัวเลขเป็นสีเข้มกว่า (#2c3e50)
+   • เพิ่ม padding จาก 60px → 100px (พื้นที่มากขึ้น)
+   
+✨ การปรับปรุงเพิ่มเติม:
+   • เพิ่มความหนาของเส้น X และ O จาก 3px → 4px
+   • ปรับปรุงการวาดกราฟให้คมชัดขึ้น
+   
+🎯 ผลลัพธ์:
+   • ตัวเลขราคามองเห็นชัดเจนมาก
+   • อ่านง่ายแม้บนหน้าจอเล็ก
+   • UI สวยงามและเป็นมืออาชีพมากขึ้น
+
+
+═══════════════════════════════════════════════════════
+
+Version 1.0.2 - (2024-10-31)
+───────────────────────────────────────────────────────
+
+✅ แก้ไข: JSON Parsing Error
+   • เพิ่ม Content-Type validation ก่อน parse JSON
+   • ปรับปรุง error handling ใน checkStatus()
+   • ปรับปรุง error handling ใน connectMT5()
+   • ปรับปรุง error handling ใน loadChart()
+   • แสดง error messages ที่ชัดเจนและเป็นประโยชน์มากขึ้น
+   
+   ผลลัพธ์:
+   • ไม่มี console errors เมื่อโหลดหน้าเว็บ
+   • แสดง error messages ที่เข้าใจง่าย
+   • ป้องกัน "Unexpected token '<'" error
+
+✨ การปรับปรุง:
+   • เพิ่ม delay 500ms ก่อนเช็คสถานะการเชื่อมต่อ
+   • Graceful error handling สำหรับทุก API calls
+   • ไม่แสดง error ที่ไม่จำเป็นใน console
+
+
+═══════════════════════════════════════════════════════
+
+Version 1.0.1 - (2024-10-31)
+───────────────────────────────────────────────────────
+
+✅ แก้ไข: FastAPI DeprecationWarning
+   • เปลี่ยนจาก @app.on_event() เป็น lifespan context manager
+   • ใช้ @asynccontextmanager สำหรับ startup/shutdown
+   • รองรับ FastAPI เวอร์ชันล่าสุด
+   
+   เดิม:
+   @app.on_event("startup")
+   async def startup_event():
+       ...
+   
+   ใหม่:
+   @asynccontextmanager
+   async def lifespan(app: FastAPI):
+       # Startup
+       yield
+       # Shutdown
+
+🎯 ผลลัพธ์:
+   • ไม่มี DeprecationWarning อีกต่อไป
+   • โค้ดทำงานเหมือนเดิม 100%
+   • รองรับ FastAPI 0.104.1+
+
+
+═══════════════════════════════════════════════════════
+
+Version 1.0.0 - Initial Release
+───────────────────────────────────────────────────────
+
+✨ Features:
+   • Point and Figure Chart calculator
+   • MT5 integration
+   • FastAPI REST API
+   • Responsive web interface
+   • Mobile support
+   • Configurable box size & reversal amount
+   • Multiple timeframe support
+   • Real-time data from MT5
+
+
+═══════════════════════════════════════════════════════
+📥 การอัปเดต
+═══════════════════════════════════════════════════════
+
+ถ้าคุณดาวน์โหลดไปแล้ว:
+1. ดาวน์โหลด pnf_mt5_project.zip เวอร์ชันใหม่
+2. แตกไฟล์และแทนที่โฟลเดอร์เดิม
+3. แก้ไข config.json ตามที่ต้องการ
+4. Refresh browser (Ctrl+F5) เพื่อล้าง cache
+
+
+═══════════════════════════════════════════════════════

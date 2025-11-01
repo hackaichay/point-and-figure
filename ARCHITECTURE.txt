@@ -1,0 +1,269 @@
+=====================================
+📐 SYSTEM ARCHITECTURE
+=====================================
+
+┌─────────────────────────────────────────────┐
+│           CLIENT SIDE                        │
+│  (Web Browser / Mobile Browser)              │
+│                                              │
+│  ┌────────────────────────────────────┐     │
+│  │      HTML/CSS/JavaScript           │     │
+│  │                                    │     │
+│  │  - Responsive UI                   │     │
+│  │  - Canvas Chart Rendering          │     │
+│  │  - AJAX API Calls                  │     │
+│  │  - Real-time Data Display          │     │
+│  └────────────────────────────────────┘     │
+│                    │                         │
+│                    │ HTTP/REST               │
+└────────────────────┼─────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────┐
+│           SERVER SIDE                        │
+│              (FastAPI)                       │
+│                                              │
+│  ┌────────────────────────────────────┐     │
+│  │         main.py                    │     │
+│  │                                    │     │
+│  │  REST API Endpoints:               │     │
+│  │  - POST /api/connect               │     │
+│  │  - GET  /api/disconnect            │     │
+│  │  - GET  /api/status                │     │
+│  │  - GET  /api/symbols               │     │
+│  │  - POST /api/chart                 │     │
+│  └────────┬────────────────┬──────────┘     │
+│           │                │                 │
+│           │                │                 │
+│  ┌────────▼────────┐  ┌────▼────────────┐   │
+│  │ mt5_connector.py│  │ pnf_calculator.py│  │
+│  │                 │  │                  │   │
+│  │ - Connection    │  │ - Box Calc       │   │
+│  │ - Get Rates     │  │ - Reversal Logic │   │
+│  │ - Get Symbols   │  │ - Chart Data     │   │
+│  └────────┬────────┘  └──────────────────┘   │
+│           │                                   │
+└───────────┼───────────────────────────────────┘
+            │
+            │ MetaTrader5 API
+            ▼
+┌─────────────────────────────────────────────┐
+│        MetaTrader 5 Terminal                 │
+│                                              │
+│  ┌────────────────────────────────────┐     │
+│  │     MT5 Platform                   │     │
+│  │                                    │     │
+│  │  - Price Data                      │     │
+│  │  - Account Info                    │     │
+│  │  - Symbol Information              │     │
+│  │  - Historical Rates                │     │
+│  └────────────────────────────────────┘     │
+│                    │                         │
+└────────────────────┼─────────────────────────┘
+                     │
+                     ▼
+            ┌────────────────┐
+            │  Broker Server │
+            │   (Live Data)  │
+            └────────────────┘
+
+
+=====================================
+📊 DATA FLOW
+=====================================
+
+1. User Request Flow:
+   User → Browser → FastAPI → MT5 Connector → MT5 Terminal → Broker
+
+2. Chart Generation Flow:
+   
+   a) User clicks "โหลดกราฟ"
+      ↓
+   b) Browser sends POST /api/chart with:
+      - symbol
+      - timeframe  
+      - bars
+      - box_size
+      - reversal_amount
+      ↓
+   c) FastAPI receives request
+      ↓
+   d) MT5 Connector fetches historical data
+      ↓
+   e) PnF Calculator processes data:
+      - Convert prices to boxes
+      - Detect reversals
+      - Build columns (X and O)
+      ↓
+   f) Return JSON data to browser
+      ↓
+   g) JavaScript draws chart on Canvas
+
+
+=====================================
+🗂️ FILE STRUCTURE
+=====================================
+
+pnf_mt5_project/
+│
+├── main.py                   # FastAPI application
+│   ├── Routes (API endpoints)
+│   ├── CORS middleware
+│   └── Startup/Shutdown events
+│
+├── mt5_connector.py          # MT5 Integration
+│   ├── connect()            # Connect to MT5
+│   ├── disconnect()         # Disconnect
+│   ├── get_rates()          # Fetch price data
+│   ├── get_symbols()        # Get symbol list
+│   └── get_symbol_info()    # Symbol details
+│
+├── pnf_calculator.py         # Point and Figure Logic
+│   ├── calculate()          # Main calculation
+│   ├── _price_to_box()      # Price conversion
+│   ├── _box_to_price()      # Box conversion
+│   └── _format_chart_data() # Format output
+│
+├── config.json               # Configuration
+│   ├── mt5 settings
+│   ├── pnf settings
+│   └── api settings
+│
+├── requirements.txt          # Python dependencies
+│
+├── static/
+│   └── index.html           # Frontend UI
+│       ├── HTML structure
+│       ├── CSS styling
+│       └── JavaScript logic
+│
+├── run.bat                  # Windows launcher
+├── run.sh                   # Linux/Mac launcher
+└── README.md                # Documentation
+
+
+=====================================
+🔄 COMPONENT INTERACTION
+=====================================
+
+┌──────────────┐
+│   Browser    │
+└──────┬───────┘
+       │ 1. POST /api/connect
+       ▼
+┌──────────────┐
+│   FastAPI    │
+└──────┬───────┘
+       │ 2. mt5_connector.connect()
+       ▼
+┌──────────────┐
+│ MT5Connector │
+└──────┬───────┘
+       │ 3. mt5.initialize()
+       │    mt5.login()
+       ▼
+┌──────────────┐
+│ MT5 Terminal │
+└──────────────┘
+
+Then for chart:
+
+┌──────────────┐
+│   Browser    │
+└──────┬───────┘
+       │ 1. POST /api/chart
+       ▼
+┌──────────────┐
+│   FastAPI    │
+└──────┬───────┘
+       │ 2. mt5_connector.get_rates()
+       ▼
+┌──────────────┐
+│ MT5Connector │ ──→ Returns DataFrame
+└──────────────┘
+       │
+       │ 3. Pass DataFrame
+       ▼
+┌──────────────┐
+│PnFCalculator │
+└──────┬───────┘
+       │ 4. calculate()
+       │    - Build columns
+       │    - Detect reversals
+       ▼
+┌──────────────┐
+│  JSON Data   │ ──→ Back to Browser
+└──────────────┘
+       │
+       │ 5. JavaScript draws on Canvas
+       ▼
+┌──────────────┐
+│ Chart Visual │
+└──────────────┘
+
+
+=====================================
+🎯 KEY FEATURES
+=====================================
+
+✓ RESTful API Design
+✓ Separation of Concerns
+✓ Modular Architecture
+✓ Responsive Frontend
+✓ Real-time Data Processing
+✓ Error Handling
+✓ Configuration Management
+✓ Cross-platform Support
+
+
+=====================================
+🔐 SECURITY CONSIDERATIONS
+=====================================
+
+1. API Level:
+   - CORS enabled (configure for production)
+   - No API key by default (add for production)
+   - Rate limiting not implemented (add if needed)
+
+2. Data Level:
+   - Passwords not exposed in API responses
+   - Config file should not be committed to Git
+   - Use environment variables for production
+
+3. Network Level:
+   - Run on localhost by default
+   - Configure firewall for external access
+   - Use HTTPS in production
+
+
+=====================================
+🚀 SCALABILITY OPTIONS
+=====================================
+
+Future Enhancements:
+
+1. Caching:
+   - Redis for chart data
+   - Reduce MT5 API calls
+
+2. WebSocket:
+   - Real-time updates
+   - Live price streaming
+
+3. Database:
+   - Store historical charts
+   - User preferences
+   - Trading history
+
+4. Microservices:
+   - Separate MT5 connector
+   - Independent scaling
+   - Load balancing
+
+5. Authentication:
+   - JWT tokens
+   - User management
+   - Session handling
+
+
+=====================================
