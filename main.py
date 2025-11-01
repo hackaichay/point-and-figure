@@ -62,7 +62,7 @@ class ChartRequest(BaseModel):
 async def read_root():
     """Serve the main HTML page"""
     try:
-        with open("/home/claude/pnf_mt5_project/static/index.html", "r", encoding="utf-8") as f:
+        with open("static/index.html", "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
         return HTMLResponse(content="<h1>Index.html not found. Please check the static folder.</h1>", status_code=404)
