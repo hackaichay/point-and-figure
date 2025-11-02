@@ -2,8 +2,8 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Point and Figure Chart - MT5 Enhanced</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Point & Figure Chart - Ultimate</title>
     <style>
         * {
             margin: 0;
@@ -12,18 +12,17 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 10px;
         }
 
         .container {
-            max-width: 1600px;
-            margin: 0 auto;
+            max-width: 100%;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
 
@@ -45,322 +44,244 @@
         }
 
         .controls {
-            padding: 20px;
+            padding: 15px;
             background: #f8f9fa;
-            border-bottom: 2px solid #e9ecef;
+            border-bottom: 2px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .form-group {
+        .control-group {
             display: flex;
             flex-direction: column;
+            gap: 5px;
+            flex: 1;
+            min-width: 120px;
         }
 
-        .form-group label {
+        .control-group label {
             font-size: 12px;
-            font-weight: 600;
             color: #495057;
-            margin-bottom: 5px;
-            text-transform: uppercase;
+            font-weight: 600;
         }
 
-        .form-group input,
-        .form-group select {
+        .control-group input,
+        .control-group select {
             padding: 10px;
-            border: 2px solid #e9ecef;
-            border-radius: 6px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
             font-size: 14px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
+        .control-group input:focus,
+        .control-group select:focus {
             outline: none;
             border-color: #667eea;
         }
 
-        .button-group {
+        .checkbox-group {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .checkbox-group:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .checkbox-group label {
+            font-size: 13px;
+            color: #495057;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .checkbox-group.active {
+            border-color: #667eea;
+            background: #e7eaff;
         }
 
         button {
             padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: auto;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
+        button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
+        button:active {
+            transform: translateY(0);
         }
 
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
-
-        .btn-warning {
-            background: #ffc107;
-            color: #212529;
-        }
-
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-
-        .status-bar {
-            padding: 15px 20px;
-            background: #fff3cd;
-            border-bottom: 2px solid #ffc107;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .status-bar.connected {
-            background: #d4edda;
-            border-color: #28a745;
-        }
-
-        .status-bar.error {
-            background: #f8d7da;
-            border-color: #dc3545;
-        }
-
-        .status-text {
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .auto-refresh-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 12px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 20px;
-            font-size: 12px;
-        }
-
-        .auto-refresh-indicator.active {
-            background: rgba(40, 167, 69, 0.2);
-            color: #28a745;
-        }
-
-        .refresh-pulse {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #28a745;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .chart-info {
-            padding: 15px 20px;
-            background: #e7f3ff;
-            border-bottom: 2px solid #2196F3;
-            display: none;
-        }
-
-        .chart-info.active {
-            display: block;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-        }
-
-        .info-item {
-            font-size: 13px;
-        }
-
-        .info-item strong {
-            color: #2196F3;
+        button:disabled {
+            background: #ced4da;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .chart-container {
-            padding: 20px;
-            overflow: hidden;
-            background: white;
             position: relative;
+            width: 100%;
+            height: calc(100vh - 300px);
+            min-height: 400px;
+            overflow: hidden;
+            background: #1e222d;
+            touch-action: none;
+            cursor: grab;
         }
 
-        .chart-controls {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .chart-container:active {
+            cursor: grabbing;
+        }
+
+        canvas {
+            display: block;
+            touch-action: none;
         }
 
         .zoom-controls {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 10px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 5px;
+            z-index: 10;
         }
 
         .zoom-btn {
             width: 40px;
             height: 40px;
-            border: none;
-            background: #f8f9fa;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 18px;
+            padding: 0;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 20px;
             font-weight: bold;
-            transition: all 0.2s;
-        }
-
-        .zoom-btn:hover {
-            background: #e9ecef;
-            transform: scale(1.1);
-        }
-
-        .zoom-level {
-            text-align: center;
-            font-size: 12px;
-            color: #6c757d;
-            font-weight: 600;
-        }
-
-        #pnfChart {
-            min-height: 600px;
-            position: relative;
-            cursor: grab;
-        }
-
-        #pnfChart.dragging {
-            cursor: grabbing;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: #6c757d;
-        }
-
-        .loading::after {
-            content: '...';
-            animation: dots 1.5s steps(4, end) infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-
-        canvas {
-            display: block;
-            margin: 0 auto;
-        }
-
-        .legend {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 6px;
-        }
-
-        .legend-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: 600;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        .legend-x {
+        .info-panel {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(30, 34, 45, 0.95);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            font-size: 12px;
+            z-index: 10;
+        }
+
+        .info-panel div {
+            margin: 3px 0;
+        }
+
+        .info-panel strong {
+            color: #667eea;
+        }
+
+        .info-panel .realtime {
             color: #28a745;
         }
 
-        .legend-o {
-            color: #dc3545;
+        .info-panel .auto-scroll {
+            color: #ffc107;
         }
 
-        .tooltip {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            pointer-events: none;
-            display: none;
-            z-index: 1000;
+        .status {
+            padding: 15px;
+            margin: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
         }
 
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 20px;
             }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .button-group {
-                flex-direction: column;
-            }
-            
-            button {
-                width: 100%;
+
+            .controls {
+                padding: 10px;
             }
 
-            .chart-controls {
-                top: 10px;
-                right: 10px;
+            .control-group {
+                min-width: 100px;
+            }
+
+            button {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+
+            .chart-container {
+                height: calc(100vh - 280px);
+            }
+
+            .info-panel {
+                font-size: 10px;
+                padding: 8px 12px;
+            }
+
+            .checkbox-group {
+                padding: 8px;
+            }
+
+            .checkbox-group label {
+                font-size: 11px;
             }
         }
     </style>
@@ -368,530 +289,510 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Point and Figure Chart - Enhanced</h1>
-            <p>Pan & Zoom | Auto-Refresh | Connected to MetaTrader 5</p>
-        </div>
-
-        <div class="status-bar" id="statusBar">
-            <span class="status-text" id="statusText">กำลังเชื่อมต่อ MT5...</span>
-            <div class="auto-refresh-indicator" id="refreshIndicator">
-                <span class="refresh-pulse"></span>
-                <span id="refreshText">Auto-Refresh: OFF</span>
-            </div>
+            <h1>📊 Point & Figure Chart</h1>
+            <p>Pan & Zoom | Price Axis | Real-time | MT5 | Auto-Scroll</p>
         </div>
 
         <div class="controls">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>MT5 Login</label>
-                    <input type="number" id="mt5Login" placeholder="12345678">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="mt5Password" placeholder="your_password">
-                </div>
-                <div class="form-group">
-                    <label>Server</label>
-                    <input type="text" id="mt5Server" placeholder="YourBroker-Demo">
-                </div>
-                <div class="form-group">
-                    <label>MT5 Path (Optional)</label>
-                    <input type="text" id="mt5Path" placeholder="C:/Program Files/MetaTrader 5/terminal64.exe">
+            <div class="control-group">
+                <label>Symbol</label>
+                <input type="text" id="symbol" value="EURUSD" placeholder="EURUSD">
+            </div>
+            <div class="control-group">
+                <label>Timeframe</label>
+                <select id="timeframe">
+                    <option value="M1">M1</option>
+                    <option value="M5">M5</option>
+                    <option value="M15" selected>M15</option>
+                    <option value="M30">M30</option>
+                    <option value="H1">H1</option>
+                    <option value="H4">H4</option>
+                    <option value="D1">D1</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Box Size</label>
+                <input type="number" id="boxSize" value="10" min="0.1" step="0.1">
+            </div>
+            <div class="control-group">
+                <label>Reversal</label>
+                <input type="number" id="reversal" value="3" min="1" step="1">
+            </div>
+            <div class="control-group">
+                <label>Bars</label>
+                <input type="number" id="bars" value="500" min="100" step="100">
+            </div>
+            <div class="control-group">
+                <label>Auto-Refresh</label>
+                <select id="autoRefresh">
+                    <option value="0">Off</option>
+                    <option value="5">5 sec</option>
+                    <option value="10" selected>10 sec</option>
+                    <option value="30">30 sec</option>
+                    <option value="60">1 min</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label style="opacity: 0; user-select: none;">-</label>
+                <div class="checkbox-group" id="autoScrollGroup" onclick="toggleAutoScroll()">
+                    <input type="checkbox" id="autoScrollCheckbox" checked>
+                    <label for="autoScrollCheckbox">🎯 Auto-Scroll</label>
                 </div>
             </div>
-
-            <div class="button-group">
-                <button class="btn-success" onclick="connectMT5()">🔗 เชื่อมต่อ MT5</button>
-                <button class="btn-secondary" onclick="disconnectMT5()">❌ ตัดการเชื่อมต่อ</button>
-            </div>
-
-            <hr style="margin: 20px 0; border: none; border-top: 2px solid #e9ecef;">
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Symbol</label>
-                    <input type="text" id="symbol" value="EURUSD" placeholder="EURUSD">
-                </div>
-                <div class="form-group">
-                    <label>Timeframe</label>
-                    <select id="timeframe">
-                        <option value="M1">M1</option>
-                        <option value="M5">M5</option>
-                        <option value="M15" selected>M15</option>
-                        <option value="M30">M30</option>
-                        <option value="H1">H1</option>
-                        <option value="H4">H4</option>
-                        <option value="D1">D1</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Bars</label>
-                    <input type="number" id="bars" value="1000" min="100" max="50000">
-                </div>
-                <div class="form-group">
-                    <label>Box Size</label>
-                    <input type="number" id="boxSize" value="10" min="1" step="1">
-                </div>
-                <div class="form-group">
-                    <label>Reversal Amount</label>
-                    <input type="number" id="reversalAmount" value="3" min="1" max="10">
-                </div>
-                <div class="form-group">
-                    <label>Auto-Refresh (seconds)</label>
-                    <input type="number" id="refreshInterval" value="30" min="5" max="300">
-                </div>
-            </div>
-
-            <div class="button-group">
-                <button class="btn-primary" onclick="loadChart()">📈 โหลดกราฟ</button>
-                <button class="btn-warning" onclick="toggleAutoRefresh()">🔄 Toggle Auto-Refresh</button>
-                <button class="btn-secondary" onclick="resetZoom()">🔍 Reset Zoom</button>
-            </div>
+            <button id="loadBtn" onclick="loadChart()">📈 โหลดกราฟ</button>
+            <button onclick="resetView()">🔄 Reset</button>
+            <button onclick="scrollToLatest()">➡️ Latest</button>
         </div>
 
-        <div class="chart-info" id="chartInfo">
-            <div class="info-grid">
-                <div class="info-item"><strong>Symbol:</strong> <span id="infoSymbol">-</span></div>
-                <div class="info-item"><strong>Timeframe:</strong> <span id="infoTimeframe">-</span></div>
-                <div class="info-item"><strong>Bars:</strong> <span id="infoBars">-</span></div>
-                <div class="info-item"><strong>Columns:</strong> <span id="infoColumns">-</span></div>
-                <div class="info-item"><strong>Box Size:</strong> <span id="infoBoxSize">-</span></div>
-                <div class="info-item"><strong>Current Bid:</strong> <span id="infoBid">-</span></div>
-                <div class="info-item"><strong>Zoom:</strong> <span id="infoZoom">100%</span></div>
-                <div class="info-item"><strong>Last Update:</strong> <span id="infoLastUpdate">-</span></div>
-            </div>
-        </div>
+        <div id="status"></div>
 
-        <div class="chart-container">
-            <div class="chart-controls">
-                <div class="zoom-controls">
-                    <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
-                    <div class="zoom-level" id="zoomLevel">100%</div>
-                    <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
-                    <button class="zoom-btn" onclick="resetZoom()" title="Reset">⟲</button>
-                </div>
+        <div class="chart-container" id="chartContainer">
+            <canvas id="pnfCanvas"></canvas>
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn()" title="ซูมเข้า">+</button>
+                <button class="zoom-btn" onclick="zoomOut()" title="ซูมออก">-</button>
+                <button class="zoom-btn" onclick="resetView()" title="รีเซ็ต">⟲</button>
+                <button class="zoom-btn" onclick="scrollToLatest()" title="ไปตำแหน่งล่าสุด">➡️</button>
             </div>
-            <div id="pnfChart">
-                <div class="loading" id="loadingText">กำลังเชื่อมต่อ MT5 อัตโนมัติ...</div>
-            </div>
-            <div class="legend">
-                <div class="legend-item legend-x">
-                    <span style="font-size: 24px; font-weight: bold;">X</span>
-                    <span>Rising (Bullish)</span>
+            <div class="info-panel" id="infoPanel">
+                <div><strong>Zoom:</strong> <span id="zoomLevel">100%</span></div>
+                <div class="realtime">
+                    <strong>Auto-Refresh:</strong> <span id="refreshStatus">Off</span>
                 </div>
-                <div class="legend-item legend-o">
-                    <span style="font-size: 24px; font-weight: bold;">O</span>
-                    <span>Falling (Bearish)</span>
+                <div class="auto-scroll">
+                    <strong>Auto-Scroll:</strong> <span id="autoScrollStatus">On</span>
+                </div>
+                <div><strong>Last Update:</strong> <span id="lastUpdate">-</span></div>
+                <div><strong>Next Update:</strong> <span id="nextUpdate">-</span></div>
+                <div style="margin-top: 5px; border-top: 1px solid #434651; padding-top: 5px;">
+                    <strong>การใช้งาน:</strong>
+                    <div>• 📱 1 นิ้ว = เลื่อน</div>
+                    <div>• 📱 2 นิ้ว = ซูม</div>
+                    <div>• 🖱️ ลาก = เลื่อน</div>
+                    <div>• 🖱️ Wheel = ซูม</div>
+                    <div>• ➡️ = ไปตำแหน่งล่าสุด</div>
                 </div>
             </div>
         </div>
-        
-        <div class="tooltip" id="tooltip"></div>
     </div>
 
     <script>
-        const API_BASE = '';
-        let appConfig = null;
-        let autoRefreshInterval = null;
-        let currentChartData = null;
-        let canvas = null;
-        let ctx = null;
+        // Configuration
+        const API_URL = window.location.origin;
         
-        // Pan & Zoom state - simple version
-        let panZoom = {
-            scale: 1.0,
-            offsetX: 0,
-            offsetY: 0,
-            minScale: 0.5,
-            maxScale: 5.0,
-            baseWidth: 0,
-            baseHeight: 0
+        // Chart data
+        let chartData = null;
+        let canvas, ctx;
+        
+        // Pan & Zoom state
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+        let isDragging = false;
+        let lastX = 0;
+        let lastY = 0;
+        
+        // Touch handling
+        let initialDistance = 0;
+        let lastScale = 1;
+        
+        // Chart settings
+        const BOX_SIZE_PX = 60;
+        const PADDING_LEFT = 20;
+        const PADDING_RIGHT = 100; // Space for price axis
+        const PADDING_TOP = 20;
+        const PADDING_BOTTOM = 20;
+        const MIN_SCALE = 0.3;
+        const MAX_SCALE = 5;
+
+        // Config from server
+        let serverConfig = null;
+
+        // Auto-refresh
+        let refreshInterval = null;
+        let nextUpdateTime = null;
+
+        // Auto-scroll setting
+        let autoScrollEnabled = true;
+
+        // Initialize
+        window.onload = async function() {
+            canvas = document.getElementById('pnfCanvas');
+            ctx = canvas.getContext('2d');
+            
+            resizeCanvas();
+            
+            // Event listeners
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Mouse events
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('mouseleave', handleMouseUp);
+            canvas.addEventListener('wheel', handleWheel, { passive: false });
+            
+            // Touch events
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd);
+            
+            // Setup auto-refresh change handler
+            document.getElementById('autoRefresh').addEventListener('change', updateAutoRefresh);
+            
+            // Update checkbox group active state
+            updateCheckboxGroupState();
+            
+            // Load config from server
+            await loadConfig();
         };
+
+        function resizeCanvas() {
+            const container = document.getElementById('chartContainer');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            if (chartData) {
+                drawChart();
+            }
+        }
+
+        // Toggle auto-scroll
+        function toggleAutoScroll() {
+            const checkbox = document.getElementById('autoScrollCheckbox');
+            checkbox.checked = !checkbox.checked;
+            autoScrollEnabled = checkbox.checked;
+            updateCheckboxGroupState();
+            document.getElementById('autoScrollStatus').textContent = autoScrollEnabled ? 'On' : 'Off';
+            
+            console.log('Auto-scroll:', autoScrollEnabled ? 'enabled' : 'disabled');
+        }
+
+        function updateCheckboxGroupState() {
+            const group = document.getElementById('autoScrollGroup');
+            const checkbox = document.getElementById('autoScrollCheckbox');
+            if (checkbox.checked) {
+                group.classList.add('active');
+            } else {
+                group.classList.remove('active');
+            }
+        }
+
+        // Scroll to latest position (rightmost column)
+        function scrollToLatest(smooth = false) {
+            if (!chartData || !chartData.columns || chartData.columns.length === 0) {
+                console.log('No chart data to scroll to');
+                return;
+            }
+
+            const numColumns = chartData.columns.length;
+            const chartWidth = PADDING_LEFT + numColumns * BOX_SIZE_PX + PADDING_RIGHT;
+            
+            // Calculate offset to show the last few columns centered
+            // Show approximately 10 columns or all if less than 10
+            const visibleColumns = Math.min(10, numColumns);
+            const targetOffsetX = canvas.width - (PADDING_LEFT + (numColumns - visibleColumns / 2) * BOX_SIZE_PX) * scale;
+            
+            if (smooth) {
+                // Smooth scroll animation
+                const startOffsetX = offsetX;
+                const distance = targetOffsetX - startOffsetX;
+                const duration = 500; // ms
+                const startTime = Date.now();
+                
+                function animate() {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Easing function (ease-out)
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    
+                    offsetX = startOffsetX + distance * easeOut;
+                    drawChart();
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    }
+                }
+                
+                animate();
+            } else {
+                // Instant scroll
+                offsetX = targetOffsetX;
+                drawChart();
+            }
+            
+            console.log(`Scrolled to latest (column ${numColumns})`);
+        }
 
         // Load configuration from server
         async function loadConfig() {
             try {
-                const response = await fetch(`${API_BASE}/api/config`);
+                showStatus('⏳ กำลังโหลด config...', 'info');
                 
+                const response = await fetch(`${API_URL}/api/config`);
                 if (!response.ok) {
-                    console.log('Config not available');
-                    return null;
+                    throw new Error('Failed to load config');
                 }
-
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    console.log('Config response is not JSON');
-                    return null;
-                }
-
-                const config = await response.json();
-                appConfig = config;
                 
-                // Fill MT5 form fields
-                if (config.mt5) {
-                    if (config.mt5.login) {
-                        document.getElementById('mt5Login').value = config.mt5.login;
-                    }
-                    if (config.mt5.server) {
-                        document.getElementById('mt5Server').value = config.mt5.server;
-                    }
-                    if (config.mt5.path) {
-                        document.getElementById('mt5Path').value = config.mt5.path;
-                    }
+                serverConfig = await response.json();
+                console.log('✅ Config loaded:', serverConfig);
+                
+                // Populate form with config values
+                if (serverConfig.chart) {
+                    document.getElementById('symbol').value = serverConfig.chart.symbol || 'EURUSD';
+                    document.getElementById('timeframe').value = serverConfig.chart.timeframe || 'M15';
+                    document.getElementById('bars').value = serverConfig.chart.bars || 500;
                 }
-
-                // Fill chart form fields
-                if (config.chart) {
-                    if (config.chart.symbol) {
-                        document.getElementById('symbol').value = config.chart.symbol;
-                    }
-                    if (config.chart.timeframe) {
-                        document.getElementById('timeframe').value = config.chart.timeframe;
-                    }
-                    if (config.chart.bars) {
-                        document.getElementById('bars').value = config.chart.bars;
-                    }
+                
+                if (serverConfig.pnf) {
+                    document.getElementById('boxSize').value = serverConfig.pnf.box_size || 10;
+                    document.getElementById('reversal').value = serverConfig.pnf.reversal_amount || 3;
                 }
-
-                // Fill P&F settings
-                if (config.pnf) {
-                    if (config.pnf.box_size) {
-                        document.getElementById('boxSize').value = config.pnf.box_size;
-                    }
-                    if (config.pnf.reversal_amount) {
-                        document.getElementById('reversalAmount').value = config.pnf.reversal_amount;
-                    }
+                
+                showStatus('✅ Config โหลดสำเร็จ', 'success');
+                
+                // Auto-connect if enabled
+                if (serverConfig.mt5 && serverConfig.mt5.auto_connect) {
+                    await autoConnect();
+                } else {
+                    showStatus('✅ พร้อมใช้งาน! กด "โหลดกราฟ" เพื่อเริ่มต้น', 'success');
                 }
-
-                return config;
+                
             } catch (error) {
-                console.log('Error loading config:', error);
-                return null;
+                console.error('⚠️ Error loading config:', error);
+                showStatus('⚠️ ไม่สามารถโหลด config ได้ - ใช้ค่าเริ่มต้น', 'info');
             }
         }
 
-        // Auto-connect to MT5 if configured
+        // Auto-connect to MT5
         async function autoConnect() {
-            const config = appConfig || await loadConfig();
-            
-            if (!config || !config.mt5 || !config.mt5.auto_connect) {
-                console.log('Auto-connect disabled or config not available');
-                updateStatus('ไม่ได้เชื่อมต่อ MT5 - กรุณาเชื่อมต่อด้วยตนเอง', 'error');
-                return;
-            }
-
-            const login = config.mt5.login;
-            const server = config.mt5.server;
-            const path = config.mt5.path;
-
-            if (!login || !server) {
-                console.log('MT5 credentials not configured');
-                updateStatus('กรุณาตั้งค่า MT5 Login และ Server ใน config.json', 'error');
-                return;
-            }
-
-            console.log('Auto-connecting to MT5...');
-            updateStatus('กำลังเชื่อมต่อ MT5 อัตโนมัติ...', 'loading');
-
             try {
-                const response = await fetch(`${API_BASE}/api/connect`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        login: login,
-                        password: "from_config",
-                        server: server,
-                        path: path || null
-                    })
-                });
-
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Server returned invalid response');
-                }
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    updateStatus(`✅ เชื่อมต่อสำเร็จ - ${data.account.name} (${data.account.login})`, 'connected');
-                    
-                    // Auto-load chart if configured
-                    if (config.chart && config.chart.auto_load) {
-                        setTimeout(() => {
-                            console.log('Auto-loading chart...');
-                            loadChart();
-                        }, 1000);
-                    }
-                } else {
-                    updateStatus(`❌ เชื่อมต่อล้มเหลว: ${data.error || data.detail}`, 'error');
-                }
-            } catch (error) {
-                updateStatus(`❌ เกิดข้อผิดพลาด: ${error.message}`, 'error');
-                console.error('Auto-connect error:', error);
-            }
-        }
-
-        async function connectMT5() {
-            const login = parseInt(document.getElementById('mt5Login').value);
-            const password = document.getElementById('mt5Password').value;
-            const server = document.getElementById('mt5Server').value;
-            const path = document.getElementById('mt5Path').value;
-
-            if (!login || !password || !server) {
-                alert('กรุณากรอก Login, Password และ Server');
-                return;
-            }
-
-            updateStatus('กำลังเชื่อมต่อ...', 'loading');
-
-            try {
-                const response = await fetch(`${API_BASE}/api/connect`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({login, password, server, path: path || null})
-                });
-
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Server returned invalid response. Make sure the API server is running.');
-                }
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    updateStatus(`✅ เชื่อมต่อสำเร็จ - ${data.account.name} (${data.account.login})`, 'connected');
-                } else {
-                    updateStatus(`❌ เชื่อมต่อล้มเหลว: ${data.error || data.detail}`, 'error');
-                }
-            } catch (error) {
-                updateStatus(`❌ เกิดข้อผิดพลาด: ${error.message}`, 'error');
-                console.error('Connection error:', error);
-            }
-        }
-
-        async function disconnectMT5() {
-            try {
-                // Stop auto-refresh first
-                if (autoRefreshInterval) {
-                    clearInterval(autoRefreshInterval);
-                    autoRefreshInterval = null;
-                    updateRefreshIndicator(false);
-                }
+                showStatus('⏳ กำลังเชื่อมต่อ MT5...', 'info');
                 
-                await fetch(`${API_BASE}/api/disconnect`);
-                updateStatus('ตัดการเชื่อมต่อแล้ว', 'loading');
-                document.getElementById('chartInfo').classList.remove('active');
-                document.getElementById('pnfChart').innerHTML = '<div class="loading">กรุณาเชื่อมต่อ MT5 และโหลดกราฟ</div>';
-                currentChartData = null;
-            } catch (error) {
-                console.error('Error disconnecting:', error);
-            }
-        }
-
-        async function loadChart(silent = false) {
-            const symbol = document.getElementById('symbol').value;
-            const timeframe = document.getElementById('timeframe').value;
-            const bars = parseInt(document.getElementById('bars').value);
-            const boxSize = parseFloat(document.getElementById('boxSize').value);
-            const reversalAmount = parseInt(document.getElementById('reversalAmount').value);
-
-            if (!symbol) {
-                alert('กรุณากรอก Symbol');
-                return;
-            }
-
-            if (!silent) {
-                document.getElementById('pnfChart').innerHTML = '<div class="loading">กำลังโหลดข้อมูล</div>';
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/api/chart`, {
+                const connectData = {
+                    login: serverConfig.mt5.login,
+                    password: "from_config",
+                    server: serverConfig.mt5.server,
+                    path: serverConfig.mt5.path || null
+                };
+                
+                const response = await fetch(`${API_URL}/api/connect`, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({symbol, timeframe, bars, box_size: boxSize, reversal_amount: reversalAmount})
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(connectData)
                 });
-
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Server returned invalid response. Make sure you are connected to MT5.');
-                }
-
+                
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.detail || 'Failed to load chart');
-                }
-
-                const data = await response.json();
-                currentChartData = data;
-                
-                // Reset zoom on new chart load (only if not silent refresh)
-                if (!silent) {
-                    panZoom.scale = 1.0;
-                    panZoom.offsetX = 0;
-                    panZoom.offsetY = 0;
+                    throw new Error(error.detail || 'Connection failed');
                 }
                 
-                drawChart(data);
-                updateChartInfo(data);
+                const result = await response.json();
+                console.log('✅ MT5 connected:', result);
                 
-                // Update last update time
-                const now = new Date();
-                document.getElementById('infoLastUpdate').textContent = now.toLocaleTimeString('th-TH');
+                showStatus(`✅ เชื่อมต่อ MT5 สำเร็จ! Account: ${result.account.login}`, 'success');
+                
+                // Auto-load chart if enabled
+                if (serverConfig.chart && serverConfig.chart.auto_load) {
+                    setTimeout(() => {
+                        loadChart();
+                    }, 1000);
+                }
+                
             } catch (error) {
-                if (!silent) {
-                    document.getElementById('pnfChart').innerHTML = `<div class="loading" style="color: #dc3545;">เกิดข้อผิดพลาด: ${error.message}</div>`;
-                }
-                console.error('Chart loading error:', error);
+                console.error('❌ Auto-connect failed:', error);
+                showStatus('❌ เชื่อมต่อ MT5 ล้มเหลว: ' + error.message, 'error');
             }
         }
 
-        function drawChart(data) {
-            const container = document.getElementById('pnfChart');
-            container.innerHTML = '';
-
-            if (!data.columns || data.columns.length === 0) {
-                container.innerHTML = '<div class="loading">ไม่มีข้อมูลให้แสดง</div>';
+        // Load chart data
+        async function loadChart(silent = false) {
+            const symbol = document.getElementById('symbol').value.trim();
+            const timeframe = document.getElementById('timeframe').value;
+            const boxSize = parseFloat(document.getElementById('boxSize').value);
+            const reversal = parseInt(document.getElementById('reversal').value);
+            const bars = parseInt(document.getElementById('bars').value);
+            
+            if (!symbol) {
+                showStatus('❌ กรุณากรอก Symbol', 'error');
                 return;
             }
-
-            // Create or reuse canvas
-            if (!canvas) {
-                canvas = document.createElement('canvas');
-                canvas.id = 'chartCanvas';
-                canvas.style.cursor = 'grab';
-                container.appendChild(canvas);
-                
-                // Add event listeners for pan & zoom
-                setupPanZoom();
+            
+            const btn = document.getElementById('loadBtn');
+            if (!silent) {
+                btn.disabled = true;
+                btn.textContent = '⏳ กำลังโหลด...';
+                showStatus('⏳ กำลังโหลดข้อมูลจาก MT5...', 'info');
             }
+            
+            try {
+                const requestData = {
+                    symbol: symbol,
+                    timeframe: timeframe,
+                    bars: bars,
+                    box_size: boxSize,
+                    reversal_amount: reversal
+                };
+                
+                const response = await fetch(`${API_URL}/api/chart`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'เกิดข้อผิดพลาด');
+                }
+                
+                chartData = await response.json();
+                console.log('✅ Chart data loaded:', chartData);
+                
+                // Handle view position based on auto-scroll and load type
+                if (autoScrollEnabled) {
+                    // Auto-scroll enabled: scroll to latest position
+                    scale = 1;
+                    offsetY = 0;
+                    scrollToLatest(silent); // This calls drawChart() internally
+                } else if (silent) {
+                    // Auto-scroll disabled + Auto-refresh: keep current position and zoom
+                    drawChart(); // Just redraw with new data at current position
+                } else {
+                    // Auto-scroll disabled + Manual load: reset to start
+                    resetView(); // This calls drawChart() internally
+                }
+                
+                const priceInfo = chartData.current_bid 
+                    ? ` | Bid: ${chartData.current_bid.toFixed(chartData.symbol.includes('JPY') ? 3 : 5)}`
+                    : '';
+                
+                if (!silent) {
+                    showStatus(`✅ ${symbol} โหลดสำเร็จ! ${chartData.columns.length} คอลัมน์${priceInfo}`, 'success');
+                }
+                
+                updateLastUpdateTime();
+                
+            } catch (error) {
+                showStatus('❌ Error: ' + error.message, 'error');
+                console.error(error);
+            } finally {
+                if (!silent) {
+                    btn.disabled = false;
+                    btn.textContent = '📈 โหลดกราฟ';
+                }
+            }
+        }
 
-            ctx = canvas.getContext('2d');
+        // Draw chart
+        function drawChart() {
+            if (!chartData || !chartData.columns || chartData.columns.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#6c757d';
+                ctx.font = '18px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('ไม่มีข้อมูลให้แสดง', canvas.width / 2, canvas.height / 2);
+                return;
+            }
             
-            // Chart dimensions - use zoom scale to change box size
-            const baseBoxSize = 30;
-            const boxPixelSize = baseBoxSize * panZoom.scale; // Zoom by changing box size!
-            const leftPadding = 120;
-            const rightPadding = 120;
-            const topPadding = 80;
-            const bottomPadding = 60;
-            
-            const numColumns = data.columns.length;
-            const numRows = data.max_box - data.min_box + 1;
-
-            // Calculate canvas size based on zoom
-            const chartWidth = numColumns * boxPixelSize;
-            const chartHeight = numRows * boxPixelSize;
-            const totalWidth = Math.max(1200, chartWidth + leftPadding + rightPadding);
-            const totalHeight = Math.max(700, chartHeight + topPadding + bottomPadding);
-            
-            canvas.width = totalWidth;
-            canvas.height = totalHeight;
-            
-            panZoom.baseWidth = totalWidth;
-            panZoom.baseHeight = totalHeight;
-
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // White background
-            ctx.fillStyle = '#ffffff';
+            // Fill background
+            ctx.fillStyle = '#1e222d';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Calculate offsets for panning (move the entire chart)
-            const offsetX = panZoom.offsetX + leftPadding;
-            const offsetY = panZoom.offsetY + topPadding;
-
+            ctx.save();
+            
+            // Apply transformations
+            ctx.translate(offsetX, offsetY);
+            ctx.scale(scale, scale);
+            
+            const numColumns = chartData.columns.length;
+            const numRows = chartData.max_box - chartData.min_box + 1;
+            
             // Draw grid
-            ctx.strokeStyle = '#e9ecef';
-            ctx.lineWidth = 1;
-
-            // Vertical lines
+            ctx.strokeStyle = '#2a2e39';
+            ctx.lineWidth = 1 / scale;
+            
             for (let i = 0; i <= numColumns; i++) {
-                const x = offsetX + i * boxPixelSize;
+                const x = PADDING_LEFT + i * BOX_SIZE_PX;
                 ctx.beginPath();
-                ctx.moveTo(x, topPadding);
-                ctx.lineTo(x, totalHeight - bottomPadding);
+                ctx.moveTo(x, PADDING_TOP);
+                ctx.lineTo(x, PADDING_TOP + numRows * BOX_SIZE_PX);
                 ctx.stroke();
             }
-
-            // Horizontal lines
+            
             for (let i = 0; i <= numRows; i++) {
-                const y = offsetY + i * boxPixelSize;
+                const y = PADDING_TOP + i * BOX_SIZE_PX;
                 ctx.beginPath();
-                ctx.moveTo(leftPadding, y);
-                ctx.lineTo(totalWidth - rightPadding, y);
+                ctx.moveTo(PADDING_LEFT, y);
+                ctx.lineTo(PADDING_LEFT + numColumns * BOX_SIZE_PX, y);
                 ctx.stroke();
             }
-
-            // Draw price labels - LEFT SIDE
-            ctx.fillStyle = '#2c3e50';
-            ctx.font = 'bold 14px Arial';
-            ctx.textAlign = 'right';
+            
+            // Draw price labels on the RIGHT (outside transformed area)
+            ctx.restore();
+            ctx.save();
+            
+            ctx.fillStyle = '#d1d4dc';
+            ctx.font = `bold ${Math.max(14, 16 * scale)}px Arial`;
+            ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
-
+            
             for (let i = 0; i <= numRows; i++) {
-                if (i % 5 === 0) {
-                    const boxNum = data.max_box - i;
-                    const price = (boxNum * data.box_size).toFixed(data.box_size < 1 ? 5 : 2);
-                    const y = offsetY + i * boxPixelSize + boxPixelSize / 2;
+                if (i % 3 === 0) {
+                    const boxNum = chartData.max_box - i;
+                    const price = (boxNum * chartData.box_size).toFixed(
+                        chartData.box_size < 1 ? 2 : chartData.box_size < 10 ? 1 : 0
+                    );
+                    const y = offsetY + (PADDING_TOP + i * BOX_SIZE_PX + BOX_SIZE_PX / 2) * scale;
+                    const x = canvas.width - PADDING_RIGHT + 10;
                     
-                    // Background
-                    const textWidth = ctx.measureText(price).width;
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                    ctx.fillRect(leftPadding - textWidth - 30, y - 12, textWidth + 20, 24);
-                    
-                    // Text
-                    ctx.fillStyle = '#2c3e50';
-                    ctx.fillText(price, leftPadding - 15, y);
+                    // Only draw if in visible area
+                    if (y > 0 && y < canvas.height) {
+                        ctx.fillText(price, x, y);
+                    }
                 }
             }
-
-            // Draw price labels - RIGHT SIDE
-            ctx.textAlign = 'left';
-            ctx.font = '11px Arial';
             
-            for (let i = 0; i <= numRows; i++) {
-                const boxNum = data.max_box - i;
-                const price = (boxNum * data.box_size).toFixed(data.box_size < 1 ? 5 : 2);
-                const y = offsetY + i * boxPixelSize + boxPixelSize / 2;
-                
-                // Background
-                const textWidth = ctx.measureText(price).width;
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                ctx.fillRect(totalWidth - rightPadding + 12, y - 9, textWidth + 8, 18);
-                
-                // Text
-                ctx.fillStyle = i % 2 === 0 ? '#495057' : '#6c757d';
-                ctx.fillText(price, totalWidth - rightPadding + 15, y);
-            }
-
-            // Draw X and O columns
-            ctx.lineWidth = Math.max(2, 4 * panZoom.scale / 2); // Scale line width
+            ctx.restore();
+            ctx.save();
             
-            data.columns.forEach((column, colIndex) => {
-                const x = offsetX + colIndex * boxPixelSize;
-
+            // Apply transformations for drawing X and O
+            ctx.translate(offsetX, offsetY);
+            ctx.scale(scale, scale);
+            
+            // Draw X's and O's
+            chartData.columns.forEach((column, colIndex) => {
+                const x = PADDING_LEFT + colIndex * BOX_SIZE_PX;
+                
                 column.boxes.forEach(boxNum => {
-                    const rowIndex = data.max_box - boxNum;
-                    const y = offsetY + rowIndex * boxPixelSize;
-
+                    const rowIndex = chartData.max_box - boxNum;
+                    const y = PADDING_TOP + rowIndex * BOX_SIZE_PX;
+                    
                     if (column.type === 'X') {
-                        // Draw X (green)
-                        ctx.strokeStyle = '#28a745';
+                        // Draw X (green/teal)
+                        ctx.strokeStyle = '#26a69a';
+                        ctx.lineWidth = 3 / scale;
                         ctx.beginPath();
-                        ctx.moveTo(x + 6, y + 6);
-                        ctx.lineTo(x + boxPixelSize - 6, y + boxPixelSize - 6);
-                        ctx.moveTo(x + boxPixelSize - 6, y + 6);
-                        ctx.lineTo(x + 6, y + boxPixelSize - 6);
+                        ctx.moveTo(x + 10, y + 10);
+                        ctx.lineTo(x + BOX_SIZE_PX - 10, y + BOX_SIZE_PX - 10);
+                        ctx.moveTo(x + BOX_SIZE_PX - 10, y + 10);
+                        ctx.lineTo(x + 10, y + BOX_SIZE_PX - 10);
                         ctx.stroke();
                     } else {
                         // Draw O (red)
-                        ctx.strokeStyle = '#dc3545';
+                        ctx.strokeStyle = '#ef5350';
+                        ctx.lineWidth = 3 / scale;
                         ctx.beginPath();
                         ctx.arc(
-                            x + boxPixelSize / 2,
-                            y + boxPixelSize / 2,
-                            Math.max(boxPixelSize / 2 - 6, 5),
+                            x + BOX_SIZE_PX / 2,
+                            y + BOX_SIZE_PX / 2,
+                            BOX_SIZE_PX / 2 - 10,
                             0,
                             Math.PI * 2
                         );
@@ -900,284 +801,202 @@
                 });
             });
             
-            // Update zoom display
+            ctx.restore();
             updateZoomDisplay();
         }
 
-        function setupPanZoom() {
-            let isDragging = false;
-            let startX = 0;
-            let startY = 0;
-            let lastOffsetX = 0;
-            let lastOffsetY = 0;
-
-            // Mouse wheel zoom
-            canvas.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                
-                const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-                const newScale = Math.max(panZoom.minScale, Math.min(panZoom.maxScale, panZoom.scale * zoomFactor));
-                
-                if (newScale !== panZoom.scale) {
-                    panZoom.scale = newScale;
-                    
-                    // Redraw chart
-                    if (currentChartData) {
-                        requestAnimationFrame(() => drawChart(currentChartData));
-                    }
-                }
-            }, { passive: false });
-
-            // Mouse down
-            canvas.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                lastOffsetX = panZoom.offsetX;
-                lastOffsetY = panZoom.offsetY;
-                canvas.style.cursor = 'grabbing';
-                e.preventDefault();
-            });
-
-            // Mouse move
-            canvas.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                
-                panZoom.offsetX = lastOffsetX + dx;
-                panZoom.offsetY = lastOffsetY + dy;
-                
-                // Redraw chart
-                if (currentChartData) {
-                    requestAnimationFrame(() => drawChart(currentChartData));
-                }
-            });
-
-            // Mouse up
-            const mouseUpHandler = () => {
-                if (isDragging) {
-                    isDragging = false;
-                    canvas.style.cursor = 'grab';
-                }
-            };
-            
-            canvas.addEventListener('mouseup', mouseUpHandler);
-            document.addEventListener('mouseup', mouseUpHandler);
-
-            // Mouse leave
-            canvas.addEventListener('mouseleave', () => {
-                if (isDragging) {
-                    isDragging = false;
-                    canvas.style.cursor = 'grab';
-                }
-            });
-
-            // Touch support
-            let lastTouchDistance = 0;
-            let touchStartOffsetX = 0;
-            let touchStartOffsetY = 0;
-            let touch1StartX = 0;
-            let touch1StartY = 0;
-            
-            canvas.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 1) {
-                    isDragging = true;
-                    touch1StartX = e.touches[0].clientX;
-                    touch1StartY = e.touches[0].clientY;
-                    touchStartOffsetX = panZoom.offsetX;
-                    touchStartOffsetY = panZoom.offsetY;
-                } else if (e.touches.length === 2) {
-                    isDragging = false;
-                    const dx = e.touches[0].clientX - e.touches[1].clientX;
-                    const dy = e.touches[0].clientY - e.touches[1].clientY;
-                    lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
-                }
-            }, { passive: true });
-
-            canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                
-                if (e.touches.length === 1 && isDragging) {
-                    const dx = e.touches[0].clientX - touch1StartX;
-                    const dy = e.touches[0].clientY - touch1StartY;
-                    
-                    panZoom.offsetX = touchStartOffsetX + dx;
-                    panZoom.offsetY = touchStartOffsetY + dy;
-                    
-                    if (currentChartData) {
-                        requestAnimationFrame(() => drawChart(currentChartData));
-                    }
-                } else if (e.touches.length === 2) {
-                    const dx = e.touches[0].clientX - e.touches[1].clientX;
-                    const dy = e.touches[0].clientY - e.touches[1].clientY;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (lastTouchDistance > 0) {
-                        const zoomFactor = distance / lastTouchDistance;
-                        const newScale = Math.max(panZoom.minScale, Math.min(panZoom.maxScale, panZoom.scale * zoomFactor));
-                        
-                        if (newScale !== panZoom.scale) {
-                            panZoom.scale = newScale;
-                            
-                            if (currentChartData) {
-                                requestAnimationFrame(() => drawChart(currentChartData));
-                            }
-                        }
-                    }
-                    
-                    lastTouchDistance = distance;
-                }
-            }, { passive: false });
-
-            canvas.addEventListener('touchend', () => {
-                isDragging = false;
-                lastTouchDistance = 0;
-            }, { passive: true });
+        // Mouse events
+        function handleMouseDown(e) {
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
         }
 
+        function handleMouseMove(e) {
+            if (!isDragging) return;
+            
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            
+            offsetX += dx;
+            offsetY += dy;
+            
+            lastX = e.clientX;
+            lastY = e.clientY;
+            
+            drawChart();
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+        }
+
+        function handleWheel(e) {
+            e.preventDefault();
+            
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            const newScale = scale * delta;
+            
+            if (newScale >= MIN_SCALE && newScale <= MAX_SCALE) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                offsetX = mouseX - (mouseX - offsetX) * delta;
+                offsetY = mouseY - (mouseY - offsetY) * delta;
+                
+                scale = newScale;
+                drawChart();
+            }
+        }
+
+        // Touch events
+        function handleTouchStart(e) {
+            e.preventDefault();
+            
+            if (e.touches.length === 1) {
+                isDragging = true;
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                initialDistance = getDistance(e.touches[0], e.touches[1]);
+                lastScale = scale;
+            }
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            
+            if (e.touches.length === 1 && isDragging) {
+                const dx = e.touches[0].clientX - lastX;
+                const dy = e.touches[0].clientY - lastY;
+                
+                offsetX += dx;
+                offsetY += dy;
+                
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+                
+                drawChart();
+            } else if (e.touches.length === 2) {
+                const currentDistance = getDistance(e.touches[0], e.touches[1]);
+                const scaleChange = currentDistance / initialDistance;
+                const newScale = lastScale * scaleChange;
+                
+                if (newScale >= MIN_SCALE && newScale <= MAX_SCALE) {
+                    const rect = canvas.getBoundingClientRect();
+                    const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+                    const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+                    
+                    offsetX = centerX - (centerX - offsetX) * (newScale / scale);
+                    offsetY = centerY - (centerY - offsetY) * (newScale / scale);
+                    
+                    scale = newScale;
+                    drawChart();
+                }
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (e.touches.length === 0) {
+                isDragging = false;
+            } else if (e.touches.length === 1) {
+                isDragging = true;
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+            }
+        }
+
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        // Zoom controls
         function zoomIn() {
-            panZoom.scale = Math.min(panZoom.maxScale, panZoom.scale * 1.2);
-            if (currentChartData) {
-                drawChart(currentChartData);
+            const newScale = scale * 1.2;
+            if (newScale <= MAX_SCALE) {
+                scale = newScale;
+                drawChart();
             }
         }
 
         function zoomOut() {
-            panZoom.scale = Math.max(panZoom.minScale, panZoom.scale / 1.2);
-            if (currentChartData) {
-                drawChart(currentChartData);
+            const newScale = scale * 0.8;
+            if (newScale >= MIN_SCALE) {
+                scale = newScale;
+                drawChart();
             }
         }
 
-        function resetZoom() {
-            panZoom.scale = 1.0;
-            panZoom.offsetX = 0;
-            panZoom.offsetY = 0;
-            if (currentChartData) {
-                drawChart(currentChartData);
-            }
+        function resetView() {
+            scale = 1;
+            offsetX = 0;
+            offsetY = 0;
+            drawChart();
         }
 
         function updateZoomDisplay() {
-            const zoomPercent = Math.round(panZoom.scale * 100);
-            document.getElementById('zoomLevel').textContent = `${zoomPercent}%`;
-            document.getElementById('infoZoom').textContent = `${zoomPercent}%`;
+            document.getElementById('zoomLevel').textContent = Math.round(scale * 100) + '%';
         }
 
-        function toggleAutoRefresh() {
-            if (autoRefreshInterval) {
-                // Stop auto-refresh
-                clearInterval(autoRefreshInterval);
-                autoRefreshInterval = null;
-                updateRefreshIndicator(false);
-            } else {
-                // Start auto-refresh
-                const interval = parseInt(document.getElementById('refreshInterval').value) * 1000;
-                autoRefreshInterval = setInterval(() => {
-                    loadChart(true); // Silent refresh
-                }, interval);
-                updateRefreshIndicator(true);
-            }
-        }
-
-        function updateRefreshIndicator(active) {
-            const indicator = document.getElementById('refreshIndicator');
-            const text = document.getElementById('refreshText');
+        // Auto-refresh functionality
+        function updateAutoRefresh() {
+            const interval = parseInt(document.getElementById('autoRefresh').value);
             
-            if (active) {
-                indicator.classList.add('active');
-                const interval = document.getElementById('refreshInterval').value;
-                text.textContent = `Auto-Refresh: ON (${interval}s)`;
-            } else {
-                indicator.classList.remove('active');
-                text.textContent = 'Auto-Refresh: OFF';
-            }
-        }
-
-        function updateChartInfo(data) {
-            document.getElementById('chartInfo').classList.add('active');
-            document.getElementById('infoSymbol').textContent = data.symbol;
-            document.getElementById('infoTimeframe').textContent = data.timeframe;
-            document.getElementById('infoBars').textContent = data.bars_analyzed;
-            document.getElementById('infoColumns').textContent = data.columns.length;
-            document.getElementById('infoBoxSize').textContent = data.box_size;
-            document.getElementById('infoBid').textContent = data.current_bid ? data.current_bid.toFixed(5) : '-';
-        }
-
-        function updateStatus(text, type) {
-            const statusBar = document.getElementById('statusBar');
-            const statusText = document.getElementById('statusText');
-            
-            statusBar.className = 'status-bar';
-            if (type === 'connected') {
-                statusBar.classList.add('connected');
-            } else if (type === 'error') {
-                statusBar.classList.add('error');
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+                nextUpdateTime = null;
             }
             
-            statusText.textContent = text;
-        }
-
-        // Check connection status on load
-        async function checkStatus() {
-            try {
-                const response = await fetch(`${API_BASE}/api/status`);
+            if (interval > 0) {
+                refreshInterval = setInterval(() => {
+                    loadChart(true);
+                }, interval * 1000);
                 
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    console.log('Server not ready or not returning JSON');
+                updateCountdown(interval);
+                document.getElementById('refreshStatus').textContent = `${interval}s`;
+            } else {
+                document.getElementById('refreshStatus').textContent = 'Off';
+                document.getElementById('nextUpdate').textContent = '-';
+            }
+        }
+
+        function updateCountdown(interval) {
+            nextUpdateTime = Date.now() + (interval * 1000);
+            
+            const countdownInterval = setInterval(() => {
+                if (!nextUpdateTime) {
+                    clearInterval(countdownInterval);
                     return;
                 }
                 
-                const data = await response.json();
+                const remaining = Math.max(0, Math.ceil((nextUpdateTime - Date.now()) / 1000));
+                document.getElementById('nextUpdate').textContent = `${remaining}s`;
                 
-                if (data.connected) {
-                    updateStatus('✅ เชื่อมต่อ MT5 แล้ว', 'connected');
+                if (remaining === 0) {
+                    clearInterval(countdownInterval);
+                    updateCountdown(interval);
                 }
-            } catch (error) {
-                console.log('Status check failed - this is normal on first load');
-            }
+            }, 100);
         }
 
-        // Initialize application
-        async function initApp() {
-            console.log('Initializing Point & Figure Chart Enhanced...');
-            
-            // Load configuration
-            const config = await loadConfig();
-            
-            if (!config) {
-                console.log('Config not loaded, using defaults');
-                updateStatus('ไม่ได้เชื่อมต่อ MT5 - กรุณาตั้งค่าและเชื่อมต่อ', 'loading');
-                return;
-            }
-
-            // Check if already connected
-            await checkStatus();
-
-            // Auto-connect if configured
-            if (config.mt5 && config.mt5.auto_connect) {
-                setTimeout(() => {
-                    autoConnect();
-                }, 500);
-            }
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('th-TH');
+            document.getElementById('lastUpdate').textContent = timeStr;
         }
 
-        // Initialize on page load
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
+        // Status messages
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
         }
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            if (autoRefreshInterval) {
-                clearInterval(autoRefreshInterval);
-            }
-        });
     </script>
 </body>
 </html>
