@@ -497,14 +497,11 @@
         let canvas = null;
         let ctx = null;
         
-        // Pan & Zoom state
+        // Pan & Zoom state - simple version
         let panZoom = {
             scale: 1.0,
             offsetX: 0,
             offsetY: 0,
-            isDragging: false,
-            lastX: 0,
-            lastY: 0,
             minScale: 0.5,
             maxScale: 5.0,
             baseWidth: 0,
@@ -761,6 +758,7 @@
             if (!canvas) {
                 canvas = document.createElement('canvas');
                 canvas.id = 'chartCanvas';
+                canvas.style.cursor = 'grab';
                 container.appendChild(canvas);
                 
                 // Add event listeners for pan & zoom
@@ -769,143 +767,131 @@
 
             ctx = canvas.getContext('2d');
             
-            // Chart dimensions
-            const boxPixelSize = 30;
-            const leftPadding = 120;  // เพิ่มขนาด padding ซ้าย
-            const rightPadding = 120; // เพิ่มขนาด padding ขวาสำหรับแสดงราคา
+            // Chart dimensions - use zoom scale to change box size
+            const baseBoxSize = 30;
+            const boxPixelSize = baseBoxSize * panZoom.scale; // Zoom by changing box size!
+            const leftPadding = 120;
+            const rightPadding = 120;
             const topPadding = 80;
             const bottomPadding = 60;
             
             const numColumns = data.columns.length;
             const numRows = data.max_box - data.min_box + 1;
 
-            // Set base canvas size (before zoom)
-            const baseWidth = Math.max(1000, numColumns * boxPixelSize + leftPadding + rightPadding);
-            const baseHeight = Math.max(600, numRows * boxPixelSize + topPadding + bottomPadding);
+            // Calculate canvas size based on zoom
+            const chartWidth = numColumns * boxPixelSize;
+            const chartHeight = numRows * boxPixelSize;
+            const totalWidth = Math.max(1200, chartWidth + leftPadding + rightPadding);
+            const totalHeight = Math.max(700, chartHeight + topPadding + bottomPadding);
             
-            panZoom.baseWidth = baseWidth;
-            panZoom.baseHeight = baseHeight;
-
-            // Apply zoom and pan
-            const scaledWidth = baseWidth * panZoom.scale;
-            const scaledHeight = baseHeight * panZoom.scale;
+            canvas.width = totalWidth;
+            canvas.height = totalHeight;
             
-            canvas.width = scaledWidth;
-            canvas.height = scaledHeight;
+            panZoom.baseWidth = totalWidth;
+            panZoom.baseHeight = totalHeight;
 
-            // Adjust canvas display size
-            const containerWidth = container.clientWidth;
-            if (canvas.width > containerWidth) {
-                canvas.style.width = '100%';
-                canvas.style.height = 'auto';
-            } else {
-                canvas.style.width = canvas.width + 'px';
-                canvas.style.height = canvas.height + 'px';
-            }
-
-            // Apply transformations
-            ctx.save();
-            ctx.scale(panZoom.scale, panZoom.scale);
-            ctx.translate(panZoom.offsetX / panZoom.scale, panZoom.offsetY / panZoom.scale);
-
-            // Draw background
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // White background
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, baseWidth, baseHeight);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculate offsets for panning (move the entire chart)
+            const offsetX = panZoom.offsetX + leftPadding;
+            const offsetY = panZoom.offsetY + topPadding;
 
             // Draw grid
             ctx.strokeStyle = '#e9ecef';
-            ctx.lineWidth = 1 / panZoom.scale;
+            ctx.lineWidth = 1;
 
             // Vertical lines
             for (let i = 0; i <= numColumns; i++) {
-                const x = leftPadding + i * boxPixelSize;
+                const x = offsetX + i * boxPixelSize;
                 ctx.beginPath();
                 ctx.moveTo(x, topPadding);
-                ctx.lineTo(x, baseHeight - bottomPadding);
+                ctx.lineTo(x, totalHeight - bottomPadding);
                 ctx.stroke();
             }
 
             // Horizontal lines
             for (let i = 0; i <= numRows; i++) {
-                const y = topPadding + i * boxPixelSize;
+                const y = offsetY + i * boxPixelSize;
                 ctx.beginPath();
                 ctx.moveTo(leftPadding, y);
-                ctx.lineTo(baseWidth - rightPadding, y);
+                ctx.lineTo(totalWidth - rightPadding, y);
                 ctx.stroke();
             }
 
-            // Draw price labels - LEFT SIDE (ทุก 5 แถว)
+            // Draw price labels - LEFT SIDE
             ctx.fillStyle = '#2c3e50';
-            ctx.font = `bold ${14 / panZoom.scale}px Arial`;
+            ctx.font = 'bold 14px Arial';
             ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
 
             for (let i = 0; i <= numRows; i++) {
                 if (i % 5 === 0) {
                     const boxNum = data.max_box - i;
                     const price = (boxNum * data.box_size).toFixed(data.box_size < 1 ? 5 : 2);
-                    const y = topPadding + i * boxPixelSize + boxPixelSize / 2;
+                    const y = offsetY + i * boxPixelSize + boxPixelSize / 2;
                     
                     // Background
                     const textWidth = ctx.measureText(price).width;
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                    ctx.fillRect(leftPadding - textWidth - 25, y - 10, textWidth + 15, 20);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                    ctx.fillRect(leftPadding - textWidth - 30, y - 12, textWidth + 20, 24);
                     
                     // Text
                     ctx.fillStyle = '#2c3e50';
-                    ctx.fillText(price, leftPadding - 15, y + 5);
+                    ctx.fillText(price, leftPadding - 15, y);
                 }
             }
 
-            // Draw price labels - RIGHT SIDE (ทุกแถว!)
+            // Draw price labels - RIGHT SIDE
             ctx.textAlign = 'left';
-            ctx.font = `${12 / panZoom.scale}px Arial`; // ขนาดเล็กลงเล็กน้อย
+            ctx.font = '11px Arial';
             
             for (let i = 0; i <= numRows; i++) {
                 const boxNum = data.max_box - i;
                 const price = (boxNum * data.box_size).toFixed(data.box_size < 1 ? 5 : 2);
-                const y = topPadding + i * boxPixelSize + boxPixelSize / 2;
+                const y = offsetY + i * boxPixelSize + boxPixelSize / 2;
                 
                 // Background
                 const textWidth = ctx.measureText(price).width;
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                ctx.fillRect(baseWidth - rightPadding + 10, y - 8, textWidth + 10, 16);
+                ctx.fillRect(totalWidth - rightPadding + 12, y - 9, textWidth + 8, 18);
                 
-                // Text with alternating colors for readability
-                if (i % 2 === 0) {
-                    ctx.fillStyle = '#495057';
-                } else {
-                    ctx.fillStyle = '#6c757d';
-                }
-                ctx.fillText(price, baseWidth - rightPadding + 15, y + 4);
+                // Text
+                ctx.fillStyle = i % 2 === 0 ? '#495057' : '#6c757d';
+                ctx.fillText(price, totalWidth - rightPadding + 15, y);
             }
 
-            // Draw columns
+            // Draw X and O columns
+            ctx.lineWidth = Math.max(2, 4 * panZoom.scale / 2); // Scale line width
+            
             data.columns.forEach((column, colIndex) => {
-                const x = leftPadding + colIndex * boxPixelSize;
+                const x = offsetX + colIndex * boxPixelSize;
 
                 column.boxes.forEach(boxNum => {
                     const rowIndex = data.max_box - boxNum;
-                    const y = topPadding + rowIndex * boxPixelSize;
+                    const y = offsetY + rowIndex * boxPixelSize;
 
                     if (column.type === 'X') {
-                        // Draw X
+                        // Draw X (green)
                         ctx.strokeStyle = '#28a745';
-                        ctx.lineWidth = 4 / panZoom.scale;
                         ctx.beginPath();
-                        ctx.moveTo(x + 5, y + 5);
-                        ctx.lineTo(x + boxPixelSize - 5, y + boxPixelSize - 5);
-                        ctx.moveTo(x + boxPixelSize - 5, y + 5);
-                        ctx.lineTo(x + 5, y + boxPixelSize - 5);
+                        ctx.moveTo(x + 6, y + 6);
+                        ctx.lineTo(x + boxPixelSize - 6, y + boxPixelSize - 6);
+                        ctx.moveTo(x + boxPixelSize - 6, y + 6);
+                        ctx.lineTo(x + 6, y + boxPixelSize - 6);
                         ctx.stroke();
                     } else {
-                        // Draw O
+                        // Draw O (red)
                         ctx.strokeStyle = '#dc3545';
-                        ctx.lineWidth = 4 / panZoom.scale;
                         ctx.beginPath();
                         ctx.arc(
                             x + boxPixelSize / 2,
                             y + boxPixelSize / 2,
-                            boxPixelSize / 2 - 5,
+                            Math.max(boxPixelSize / 2 - 6, 5),
                             0,
                             Math.PI * 2
                         );
@@ -913,94 +899,115 @@
                     }
                 });
             });
-
-            ctx.restore();
             
             // Update zoom display
             updateZoomDisplay();
         }
 
         function setupPanZoom() {
-            let startX, startY;
+            let isDragging = false;
+            let startX = 0;
+            let startY = 0;
+            let lastOffsetX = 0;
+            let lastOffsetY = 0;
 
             // Mouse wheel zoom
             canvas.addEventListener('wheel', (e) => {
                 e.preventDefault();
                 
-                const rect = canvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
+                const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+                const newScale = Math.max(panZoom.minScale, Math.min(panZoom.maxScale, panZoom.scale * zoomFactor));
                 
-                const delta = e.deltaY > 0 ? 0.9 : 1.1;
-                const newScale = Math.max(panZoom.minScale, Math.min(panZoom.maxScale, panZoom.scale * delta));
-                
-                // Zoom towards mouse position
-                const scaleChange = newScale / panZoom.scale;
-                panZoom.offsetX = mouseX - (mouseX - panZoom.offsetX) * scaleChange;
-                panZoom.offsetY = mouseY - (mouseY - panZoom.offsetY) * scaleChange;
-                panZoom.scale = newScale;
-                
-                if (currentChartData) {
-                    drawChart(currentChartData);
-                }
-            });
-
-            // Mouse drag pan
-            canvas.addEventListener('mousedown', (e) => {
-                panZoom.isDragging = true;
-                startX = e.clientX - panZoom.offsetX;
-                startY = e.clientY - panZoom.offsetY;
-                canvas.style.cursor = 'grabbing';
-                document.getElementById('pnfChart').classList.add('dragging');
-            });
-
-            canvas.addEventListener('mousemove', (e) => {
-                if (panZoom.isDragging) {
-                    panZoom.offsetX = e.clientX - startX;
-                    panZoom.offsetY = e.clientY - startY;
+                if (newScale !== panZoom.scale) {
+                    panZoom.scale = newScale;
                     
+                    // Redraw chart
                     if (currentChartData) {
-                        drawChart(currentChartData);
+                        requestAnimationFrame(() => drawChart(currentChartData));
                     }
                 }
+            }, { passive: false });
+
+            // Mouse down
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                lastOffsetX = panZoom.offsetX;
+                lastOffsetY = panZoom.offsetY;
+                canvas.style.cursor = 'grabbing';
+                e.preventDefault();
             });
 
-            canvas.addEventListener('mouseup', () => {
-                panZoom.isDragging = false;
-                canvas.style.cursor = 'grab';
-                document.getElementById('pnfChart').classList.remove('dragging');
+            // Mouse move
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                
+                panZoom.offsetX = lastOffsetX + dx;
+                panZoom.offsetY = lastOffsetY + dy;
+                
+                // Redraw chart
+                if (currentChartData) {
+                    requestAnimationFrame(() => drawChart(currentChartData));
+                }
             });
 
+            // Mouse up
+            const mouseUpHandler = () => {
+                if (isDragging) {
+                    isDragging = false;
+                    canvas.style.cursor = 'grab';
+                }
+            };
+            
+            canvas.addEventListener('mouseup', mouseUpHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+
+            // Mouse leave
             canvas.addEventListener('mouseleave', () => {
-                panZoom.isDragging = false;
-                canvas.style.cursor = 'grab';
-                document.getElementById('pnfChart').classList.remove('dragging');
+                if (isDragging) {
+                    isDragging = false;
+                    canvas.style.cursor = 'grab';
+                }
             });
 
             // Touch support
             let lastTouchDistance = 0;
+            let touchStartOffsetX = 0;
+            let touchStartOffsetY = 0;
+            let touch1StartX = 0;
+            let touch1StartY = 0;
             
             canvas.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 1) {
-                    panZoom.isDragging = true;
-                    startX = e.touches[0].clientX - panZoom.offsetX;
-                    startY = e.touches[0].clientY - panZoom.offsetY;
+                    isDragging = true;
+                    touch1StartX = e.touches[0].clientX;
+                    touch1StartY = e.touches[0].clientY;
+                    touchStartOffsetX = panZoom.offsetX;
+                    touchStartOffsetY = panZoom.offsetY;
                 } else if (e.touches.length === 2) {
+                    isDragging = false;
                     const dx = e.touches[0].clientX - e.touches[1].clientX;
                     const dy = e.touches[0].clientY - e.touches[1].clientY;
                     lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
                 }
-            });
+            }, { passive: true });
 
             canvas.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 
-                if (e.touches.length === 1 && panZoom.isDragging) {
-                    panZoom.offsetX = e.touches[0].clientX - startX;
-                    panZoom.offsetY = e.touches[0].clientY - startY;
+                if (e.touches.length === 1 && isDragging) {
+                    const dx = e.touches[0].clientX - touch1StartX;
+                    const dy = e.touches[0].clientY - touch1StartY;
+                    
+                    panZoom.offsetX = touchStartOffsetX + dx;
+                    panZoom.offsetY = touchStartOffsetY + dy;
                     
                     if (currentChartData) {
-                        drawChart(currentChartData);
+                        requestAnimationFrame(() => drawChart(currentChartData));
                     }
                 } else if (e.touches.length === 2) {
                     const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -1008,22 +1015,26 @@
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     
                     if (lastTouchDistance > 0) {
-                        const delta = distance > lastTouchDistance ? 1.02 : 0.98;
-                        panZoom.scale = Math.max(panZoom.minScale, Math.min(panZoom.maxScale, panZoom.scale * delta));
+                        const zoomFactor = distance / lastTouchDistance;
+                        const newScale = Math.max(panZoom.minScale, Math.min(panZoom.maxScale, panZoom.scale * zoomFactor));
                         
-                        if (currentChartData) {
-                            drawChart(currentChartData);
+                        if (newScale !== panZoom.scale) {
+                            panZoom.scale = newScale;
+                            
+                            if (currentChartData) {
+                                requestAnimationFrame(() => drawChart(currentChartData));
+                            }
                         }
                     }
                     
                     lastTouchDistance = distance;
                 }
-            });
+            }, { passive: false });
 
             canvas.addEventListener('touchend', () => {
-                panZoom.isDragging = false;
+                isDragging = false;
                 lastTouchDistance = 0;
-            });
+            }, { passive: true });
         }
 
         function zoomIn() {
